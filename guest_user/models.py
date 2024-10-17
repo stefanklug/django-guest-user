@@ -10,7 +10,7 @@ from django.utils.timezone import now
 from . import settings
 from .exceptions import NotGuestError
 from .functions import is_guest_user
-from .signals import converted, guest_created
+from .signals import converted, guest_created, merge
 
 UserModel = get_user_model()
 
@@ -82,6 +82,15 @@ class GuestManager(models.Manager.from_queryset(GuestQuerySet)):
         self.filter(user=user).delete()
         converted.send(self, user=user)
         return user
+    
+    def merge(self, guest_user, user):
+        """Merge the given guest user into the already existing user"""
+        if not is_guest_user(gues_user):
+            raise NotGuestError('You cannot merge a non-guest user')
+        
+        #send the merge before deleting the user, to be able to handle the situation properly
+        merge.send(self, guest_user=guest_user, user=user)
+        guest_user.delete()
 
     def delete_expired(self):
         """

@@ -16,3 +16,12 @@ A guest user converted to a regular registered user.
 :param user: The now registered user.
 
 """
+
+merge = Signal()
+"""
+A guest user shall be merged to a regular registered user.
+
+:param guest_user: The guest user.
+:param user: The now registered user.
+
+"""
